@@ -5,8 +5,6 @@ waiting on you, who's stuck.
 
 Each live window becomes a desk. Read-only, local-only, pure standard library.
 
-> The UI is in Chinese. Everything else — code, comments, docs — is English.
-
 ## Run it
 
 ```sh

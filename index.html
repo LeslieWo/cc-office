@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -139,7 +139,7 @@
 <body>
 
 <header>
-  <h1>CC Office<span class="sub">你现在开着的每一个 Claude Code 窗口</span></h1>
+  <h1>CC Office<span class="sub">every Claude Code window you have open</span></h1>
   <div class="counts" id="counts"></div>
 </header>
 
@@ -147,26 +147,26 @@
 <footer id="foot"></footer>
 
 <dialog id="editor">
-  <h3>给这个窗口起个名字</h3>
+  <h3>Name this window</h3>
   <p id="editor-sub"></p>
-  <input id="nameInput" placeholder="比如：数据分析" maxlength="24" autocomplete="off">
+  <input id="nameInput" placeholder="e.g. data analysis" maxlength="24" autocomplete="off">
   <div class="faces" id="faces"></div>
   <div class="row">
-    <button id="clearBtn">恢复默认</button>
-    <button id="saveBtn" class="go">保存</button>
+    <button id="clearBtn">Reset</button>
+    <button id="saveBtn" class="go">Save</button>
   </div>
 </dialog>
 
 <script>
 const FACES = ["🐧","🦊","🐢","🐙","🦉","🐻","🐳","🦁","🐸","🦩","🐺","🦭","🐝","🦌","🐨","🦔"];
-const LABEL = { working:"干活中", waiting:"等你回话", stalled:"可能卡住了" };
+const LABEL = { working:"working", waiting:"waiting on you", stalled:"maybe stuck" };
 let editing = null, pickedFace = "";
 
 function ago(s) {
-  if (s < 60) return s + " 秒";
-  if (s < 3600) return Math.floor(s / 60) + " 分钟";
+  if (s < 60) return s + "s";
+  if (s < 3600) return Math.floor(s / 60) + "m";
   const h = Math.floor(s / 3600);
-  return h < 24 ? h + " 小时" : Math.floor(h / 24) + " 天";
+  return h < 24 ? h + "h" : Math.floor(h / 24) + "d";
 }
 const esc = s => (s || "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
@@ -176,22 +176,22 @@ function render(data) {
   data.people.forEach(p => n[p.state]++);
 
   document.getElementById("counts").innerHTML =
-    (n.waiting ? `<span class="pill hot"><span class="dot waiting"></span><b>${n.waiting}</b> 个在等你回话</span>` : "") +
-    (n.stalled ? `<span class="pill hot"><span class="dot stalled"></span><b>${n.stalled}</b> 个可能卡住了</span>` : "") +
-    `<span class="pill"><span class="dot working"></span><b>${n.working}</b> 个在干活</span>`;
+    (n.waiting ? `<span class="pill hot"><span class="dot waiting"></span><b>${n.waiting}</b> waiting on you</span>` : "") +
+    (n.stalled ? `<span class="pill hot"><span class="dot stalled"></span><b>${n.stalled}</b> maybe stuck</span>` : "") +
+    `<span class="pill"><span class="dot working"></span><b>${n.working}</b> working</span>`;
 
   if (!data.people.length) {
-    floor.innerHTML = `<div class="empty">办公室空着，一个 Claude Code 窗口都没开。</div>`;
+    floor.innerHTML = `<div class="empty">Office is empty — no Claude Code windows open.</div>`;
   } else {
     floor.innerHTML = data.people.map(p => {
       const quiet = !p.bubble;
       const bubbleTxt = p.bubble || "……";
       const cls = quiet ? "quiet" : (p.bubble_kind === "tool" ? "tool" : "");
-      const title = p.name || p.task || "（还没派活）";
+      const title = p.name || p.task || "(no job yet)";
       return `
       <div class="desk ${p.state}">
         <div class="bubble ${cls}">${esc(bubbleTxt)}</div>
-        <div class="guy" data-sid="${p.sid}" data-name="${esc(p.name)}" data-avatar="${p.avatar}" title="点一下改名">
+        <div class="guy" data-sid="${p.sid}" data-name="${esc(p.name)}" data-avatar="${p.avatar}" title="click to rename">
           <div class="avatar">${p.avatar}</div>
           <div class="badge ${p.state}"></div>
         </div>
@@ -199,23 +199,23 @@ function render(data) {
         <div class="name">${esc(title)}<span class="tag">${p.pid}</span></div>
         ${p.name && p.task ? `<div class="task">${esc(p.task)}</div>` : ""}
         ${p.reply && p.reply !== title && p.reply !== p.task
-            ? `<div class="task">你最后说：${esc(p.reply)}</div>` : ""}
-        <div class="meta"><span>${LABEL[p.state]}</span><span>开了 ${ago(p.uptime)}</span><span>${p.cwd}</span></div>
+            ? `<div class="task">You last said: ${esc(p.reply)}</div>` : ""}
+        <div class="meta"><span>${LABEL[p.state]}</span><span>up ${ago(p.uptime)}</span><span>${p.cwd}</span></div>
         ${p.interns.length ? `<div class="interns">${p.interns.map(i =>
-            `<span class="intern">${esc(i.who)} 在跑：${esc(i.doing)}</span>`).join("")}</div>` : ""}
+            `<span class="intern">${esc(i.who)} is running: ${esc(i.doing)}</span>`).join("")}</div>` : ""}
       </div>`;
     }).join("");
   }
 
   document.getElementById("foot").textContent =
-    "每 2 秒刷新一次，只读不写。点头像可以改名。" ;
+    "Refreshes every 2s. Read-only. Click a face to rename.";
   document.querySelectorAll(".guy").forEach(g => g.onclick = () => openEditor(g.dataset));
 }
 
 function openEditor(d) {
   editing = d.sid;
   pickedFace = d.avatar;
-  document.getElementById("editor-sub").textContent = "PID " + d.sid.slice(0, 8);
+  document.getElementById("editor-sub").textContent = "Session " + d.sid.slice(0, 8);
   document.getElementById("nameInput").value = d.name || "";
   document.getElementById("faces").innerHTML = FACES.map(f =>
     `<button data-f="${f}" aria-pressed="${f === pickedFace}">${f}</button>`).join("");
@@ -249,7 +249,7 @@ async function tick() {
     const r = await fetch("/api/office", { cache: "no-store" });
     render(await r.json());
   } catch (e) {
-    document.getElementById("foot").textContent = "连不上 server.py，是不是关掉了？";
+    document.getElementById("foot").textContent = "Can't reach server.py — did it stop?";
   }
 }
 tick();

@@ -13,9 +13,9 @@ sleep 1
 
 if lsof -ti tcp:$PORT > /dev/null; then
   open "http://localhost:$PORT"
-  echo "CC Office 开着了：http://localhost:$PORT"
-  echo "关掉它：把这个窗口关了，或者跑 lsof -ti tcp:$PORT | xargs kill"
+  echo "CC Office is up:  http://localhost:$PORT"
+  echo "To stop it: close this window, or run  lsof -ti tcp:$PORT | xargs kill"
 else
-  echo "起不来，日志在这："
+  echo "Failed to start. Log:"
   cat /tmp/cc-office.log
 fi

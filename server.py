@@ -38,14 +38,12 @@ AVATARS = ["🐧", "🦊", "🐢", "🐙", "🦉", "🐻", "🐳", "🦁", "🐸
 
 # subagent_type -> display name shown on the intern badge
 AGENT_NAMES = {
-    "kai": "Kai",
-    "max": "Max",
-    "explore": "侦察",
-    "general-purpose": "打杂",
-    "plan": "架构",
-    "claude": "帮手",
-    "claude-code-guide": "CC 向导",
-    "statusline-setup": "配置",
+    "explore": "Explore",
+    "general-purpose": "General",
+    "plan": "Plan",
+    "claude": "Helper",
+    "claude-code-guide": "CC Guide",
+    "statusline-setup": "Statusline",
 }
 
 _cache = {}  # path -> (mtime, size, parsed)
@@ -129,10 +127,10 @@ def clean_text(t):
     if not t:
         return ""
     t = re.sub(r"<system-reminder>.*?</system-reminder>", "", t, flags=re.S)
-    t = re.sub(r"\[Image:[^\]]*\]", "（图片）", t)
-    t = re.sub(r"\[Pasted text[^\]]*\]", "（长文本）", t)
+    t = re.sub(r"\[Image:[^\]]*\]", "(image)", t)
+    t = re.sub(r"\[Pasted text[^\]]*\]", "(pasted text)", t)
     t = re.sub(r"<[a-z-]+>.*?</[a-z-]+>", "", t, flags=re.S)
-    t = re.sub(r"```.*?```", " (代码) ", t, flags=re.S)
+    t = re.sub(r"```.*?```", " (code) ", t, flags=re.S)
     t = re.sub(r"[*#`>]", "", t)
     t = re.sub(r"\|", " ", t)          # markdown table pipes
     t = re.sub(r"-{3,}", " ", t)       # table rules and hr
@@ -285,11 +283,11 @@ def collect():
 
         raw_status = s.get("status", "")
         if raw_status == "idle":
-            state, mood = "waiting", "等你回话"
+            state, mood = "waiting", "waiting on you"
         elif silence > STALL_SECONDS:
-            state, mood = "stalled", "卡住了，可能在等你点确认"
+            state, mood = "stalled", "stuck — probably waiting on a confirmation"
         else:
-            state, mood = "working", "干活中"
+            state, mood = "working", "working"
 
         # The speech bubble: what it is doing, or what it last said to her.
         if state == "working" and info["pending"]:
