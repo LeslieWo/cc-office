@@ -1,0 +1,21 @@
+#!/bin/zsh
+# Double-click me. Restarts CC Office and opens it in the browser.
+cd "$(dirname "$0")" || exit 1
+
+PORT=8910
+
+# An older copy still holding the port would silently keep serving stale code.
+lsof -ti tcp:$PORT | xargs -r kill 2>/dev/null
+sleep 1
+
+nohup /usr/bin/python3 server.py > /tmp/cc-office.log 2>&1 &
+sleep 1
+
+if lsof -ti tcp:$PORT > /dev/null; then
+  open "http://localhost:$PORT"
+  echo "CC Office 开着了：http://localhost:$PORT"
+  echo "关掉它：把这个窗口关了，或者跑 lsof -ti tcp:$PORT | xargs kill"
+else
+  echo "起不来，日志在这："
+  cat /tmp/cc-office.log
+fi

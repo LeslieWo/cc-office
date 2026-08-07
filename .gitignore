@@ -1,0 +1,7 @@
+# Your own desk names and avatars — personal, not shared.
+roster.json
+roster.json.tmp
+
+__pycache__/
+*.pyc
+.DS_Store
